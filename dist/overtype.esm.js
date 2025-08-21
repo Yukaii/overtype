@@ -133,6 +133,17 @@ var MarkdownParser = class {
     return html;
   }
   /**
+   * Parse strikethrough text
+   * Supports both single (~) and double (~~) tildes, but rejects 3+ tildes
+   * @param {string} html - HTML with potential strikethrough markdown
+   * @returns {string} HTML with strikethrough styling
+   */
+  static parseStrikethrough(html) {
+    html = html.replace(new RegExp("(?<!~)~~(?!~)(.+?)(?<!~)~~(?!~)", "g"), '<del><span class="syntax-marker">~~</span>$1<span class="syntax-marker">~~</span></del>');
+    html = html.replace(new RegExp("(?<!~)~(?!~)(.+?)(?<!~)~(?!~)", "g"), '<del><span class="syntax-marker">~</span>$1<span class="syntax-marker">~</span></del>');
+    return html;
+  }
+  /**
    * Parse inline code
    * @param {string} html - HTML with potential code markdown
    * @returns {string} HTML with code styling
@@ -194,6 +205,7 @@ var MarkdownParser = class {
       sanctuaries.set(placeholder, match);
       return placeholder;
     });
+    html = this.parseStrikethrough(html);
     html = this.parseBold(html);
     html = this.parseItalic(html);
     sanctuaries.forEach((content, placeholder) => {
@@ -1546,6 +1558,14 @@ function generateStyles(options = {}) {
       text-decoration-color: var(--em, #f95738) !important;
       text-decoration-thickness: 1px !important;
       font-style: italic !important;
+    }
+
+    /* Strikethrough text */
+    .overtype-wrapper .overtype-preview del {
+      color: var(--del, #ee964b) !important;
+      text-decoration: line-through !important;
+      text-decoration-color: var(--del, #ee964b) !important;
+      text-decoration-thickness: 1px !important;
     }
 
     /* Inline code */
